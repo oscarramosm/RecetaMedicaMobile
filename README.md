@@ -56,6 +56,7 @@ Para instalarlo en Android, copia ese APK al celular y abrelo. Android pedira pe
 
 ## Notas
 
-- Web Speech funciona mejor en Chrome Android.
+- En APK Android se usa reconocimiento de voz nativo mediante Capacitor.
+- En navegador se usa Web Speech como respaldo.
 - La impresion directa depende de que la impresora este disponible desde el celular por WiFi/Mopria/plugin del fabricante.
 - Si se borra el sitio/datos del navegador, tambien se borra la base local; usar Exportar respaldo periodicamente.

@@ -27,6 +27,8 @@ let indications = [];
 let voiceRecognition = null;
 let voiceActive = false;
 let voiceField = "";
+let nativeVoiceListening = false;
+let nativeVoiceLastText = "";
 let currentRecipeId = "";
 let currentPatientId = "";
 
@@ -442,11 +444,72 @@ async function applyVoice(text) {
   setStatus(`Voz: ${field}.`);
 }
 
-function startVoice() {
+function nativeSpeechPlugin() {
+  return window.Capacitor?.Plugins?.SpeechRecognition || null;
+}
+
+function isNativeAndroidVoiceAvailable() {
+  return Boolean(window.Capacitor?.isNativePlatform?.() && nativeSpeechPlugin());
+}
+
+async function ensureNativeVoicePermission(plugin) {
+  const current = await plugin.checkPermissions().catch(() => ({ speechRecognition: "prompt" }));
+  if (current.speechRecognition === "granted") return true;
+  const requested = await plugin.requestPermissions().catch(() => ({ speechRecognition: "denied" }));
+  return requested.speechRecognition === "granted";
+}
+
+async function startNativeVoice() {
+  const plugin = nativeSpeechPlugin();
+  if (!plugin) return false;
+
+  const available = await plugin.available().catch(() => ({ available: false }));
+  if (!available.available) {
+    setStatus("El reconocimiento de voz no está disponible en este Android.");
+    return true;
+  }
+
+  if (!(await ensureNativeVoicePermission(plugin))) {
+    setStatus("Activa el permiso de micrófono para usar dictado.");
+    return true;
+  }
+
+  await plugin.removeAllListeners().catch(() => {});
+  await plugin.addListener("partialResults", (data) => {
+    const text = (data.matches || []).find(Boolean) || "";
+    if (!text) return;
+    nativeVoiceLastText = text;
+    voiceStatus.textContent = `Escuchando: ${text}`;
+  });
+  await plugin.addListener("listeningState", (data) => {
+    nativeVoiceListening = data.status === "started";
+    if (data.status !== "stopped") return;
+    const text = nativeVoiceLastText.trim();
+    nativeVoiceLastText = "";
+    if (text) applyVoice(text);
+    if (voiceActive) window.setTimeout(startNativeVoice, 350);
+  });
+
+  try {
+    nativeVoiceListening = true;
+    await plugin.start({
+      language: "es-MX",
+      maxResults: 3,
+      partialResults: true,
+      popup: false,
+    });
+  } catch {
+    nativeVoiceListening = false;
+    if (voiceActive) window.setTimeout(startNativeVoice, 650);
+  }
+  return true;
+}
+
+function startWebVoice() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
     setStatus("Este navegador no permite dictado en vivo.");
-    return;
+    return false;
   }
   voiceRecognition = new SpeechRecognition();
   voiceRecognition.lang = "es-MX";
@@ -469,12 +532,31 @@ function startVoice() {
     voiceStatus.textContent = "Sigue dictando. Si se detiene, vuelve a activar voz.";
   };
   voiceRecognition.start();
-  setVoiceState(true, "Di paciente, edad, talla, peso, diagnóstico, medicamentos o indicaciones.");
+  return true;
 }
 
-function stopVoice() {
+async function startVoice() {
+  setVoiceState(true, "Di paciente, edad, talla, peso, diagnóstico, medicamentos o indicaciones.");
+  if (isNativeAndroidVoiceAvailable()) {
+    await startNativeVoice();
+    return;
+  }
+  startWebVoice();
+}
+
+async function stopVoice() {
   voiceActive = false;
-  if (voiceRecognition) voiceRecognition.stop();
+  if (voiceRecognition) {
+    voiceRecognition.stop();
+    voiceRecognition = null;
+  }
+  const plugin = nativeSpeechPlugin();
+  if (plugin) {
+    await plugin.stop().catch(() => {});
+    await plugin.removeAllListeners().catch(() => {});
+  }
+  nativeVoiceListening = false;
+  nativeVoiceLastText = "";
   setVoiceState(false);
   setStatus("Voz detenida.");
 }
