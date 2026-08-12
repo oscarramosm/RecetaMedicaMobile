@@ -33,6 +33,27 @@ Para instalarla en el celular como app, hay que publicarla en HTTPS, por ejemplo
 
 La base de datos queda local en el navegador del celular. El hosting solo entrega los archivos de la app.
 
+## Android local con APK
+
+Tambien esta preparada con Capacitor para generar APK Android sin depender de hosting.
+
+Compilar APK debug:
+
+```powershell
+cd C:\Users\Oscar\source\repos\EmpresaAPIAgenda\RecetaMedicaMobile
+$env:JAVA_HOME='C:\Program Files\Android\Android Studio\jbr'
+$env:PATH="$env:JAVA_HOME\bin;$env:PATH"
+android\gradlew.bat -p android assembleDebug
+```
+
+APK generado:
+
+```text
+C:\Users\Oscar\source\repos\EmpresaAPIAgenda\RecetaMedicaMobile\android\app\build\outputs\apk\debug\app-debug.apk
+```
+
+Para instalarlo en Android, copia ese APK al celular y abrelo. Android pedira permitir instalacion desde origen desconocido.
+
 ## Notas
 
 - Web Speech funciona mejor en Chrome Android.

@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Receta Médica Móvil</title>
+    <meta name="theme-color" content="#3b6e9e" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="stylesheet" href="styles.css?v=1" />
+  </head>
+  <body>
+    <header class="app-top no-print">
+      <div>
+        <p>Receta médica</p>
+        <h1>Móvil</h1>
+      </div>
+      <button id="voiceBtn" class="voice-button" type="button">Activar voz</button>
+    </header>
+
+    <main class="app-shell">
+      <section id="recipeView" class="view active-view">
+        <div id="voicePanel" class="voice-panel no-print" hidden>
+          <span class="voice-dot" aria-hidden="true"></span>
+          <div>
+            <strong id="voiceTitle">Escuchando dictado</strong>
+            <p id="voiceStatus">Di paciente, edad, diagnóstico, medicamentos o indicaciones.</p>
+          </div>
+        </div>
+
+        <section class="card no-print">
+          <label>
+            Buscar receta guardada
+            <input id="recipeSearch" type="search" autocomplete="off" />
+          </label>
+          <div id="recipeResults" class="search-results" hidden></div>
+          <p id="status" class="status">Datos guardados localmente en este celular.</p>
+        </section>
+
+        <form id="recipeForm" class="stack">
+          <section class="card">
+            <h2>Datos del paciente</h2>
+            <div class="patient-grid">
+              <label>Fecha <input name="fecha" type="date" /></label>
+              <label>Paciente <input name="paciente" type="text" autocomplete="off" /></label>
+              <label>Edad <input name="edad" type="text" /></label>
+              <label>Talla <input name="talla" type="text" /></label>
+              <label>Peso <input name="peso" type="text" /></label>
+              <label>Pulso <input name="pulso" type="text" /></label>
+              <label>Temperatura <input name="temperatura" type="text" /></label>
+              <label>Tensión arterial <input name="ta" type="text" /></label>
+            </div>
+          </section>
+
+          <section class="card">
+            <div class="section-head">
+              <h2>Diagnóstico / motivo</h2>
+              <label class="check"><input type="checkbox" data-na-for="diagnostico" /> No Aplica</label>
+            </div>
+            <textarea name="diagnostico" rows="4"></textarea>
+            <button class="danger-link" data-clear-textarea="diagnostico" type="button">Limpiar diagnóstico</button>
+          </section>
+
+          <section class="card">
+            <h2>Medicamentos</h2>
+            <textarea name="medicamentos" rows="7"></textarea>
+            <div class="control-row">
+              <label class="grow">Medicamento <input id="medicineSearch" type="search" autocomplete="off" /></label>
+              <label>Cada <select id="medicineHours"></select></label>
+              <label>Días <select id="medicineDays"></select></label>
+              <button id="insertMedicineBtn" type="button">Insertar</button>
+            </div>
+            <button class="danger-link" data-clear-textarea="medicamentos" type="button">Limpiar medicamentos</button>
+          </section>
+
+          <section class="card">
+            <div class="section-head">
+              <h2>Indicaciones</h2>
+              <label class="check"><input type="checkbox" data-na-for="indicaciones" /> No Aplica</label>
+            </div>
+            <textarea name="indicaciones" rows="5"></textarea>
+            <div class="control-row">
+              <label class="grow">Indicaciones comunes <select id="indicationSelect"></select></label>
+              <button id="insertIndicationBtn" type="button">Insertar</button>
+            </div>
+            <button class="danger-link" data-clear-textarea="indicaciones" type="button">Limpiar indicaciones</button>
+          </section>
+
+          <section class="card">
+            <div class="section-head">
+              <h2>Indicaciones al Reverso</h2>
+              <label class="check"><input type="checkbox" data-na-for="otrasIndicaciones" /> No Aplica</label>
+            </div>
+            <textarea name="otrasIndicaciones" rows="5"></textarea>
+            <div class="control-row">
+              <label class="grow">Indicaciones comunes <select id="otherIndicationSelect"></select></label>
+              <button id="insertOtherIndicationBtn" type="button">Insertar</button>
+            </div>
+            <button class="danger-link" data-clear-textarea="otrasIndicaciones" type="button">Limpiar reverso</button>
+          </section>
+        </form>
+      </section>
+
+      <section id="previewView" class="view">
+        <div class="print-actions no-print">
+          <button id="printFrontBtn" class="primary" type="button">Imprimir receta</button>
+          <button id="printBackBtn" type="button">Imprimir reverso</button>
+        </div>
+        <article id="recipePreview" class="recipe-page">
+          <div class="rx-header">
+            <img id="logoLeft" src="assets/ipn-logo-darkblue.png" alt="" />
+            <div>
+              <strong id="doctorTitlePreview">Consultorio Médico Montevideo</strong>
+              <h2 id="doctorNamePreview">Dr. Rodolfo Maricón López</h2>
+              <p id="doctorMetaPreview">PEDIATRÍA • CIRUGÍA • PARTOS • GINECOLOGÍA • URGENCIAS</p>
+            </div>
+            <img id="logoRight" src="assets/medical-caduceus-darkblue.png" alt="" />
+          </div>
+          <div class="rx-lines">
+            <p><span>NOMBRE:</span><strong data-preview="paciente"></strong></p>
+            <p><span>FECHA:</span><strong data-preview="fecha"></strong></p>
+            <p><span>TALLA:</span><strong data-preview="talla"></strong><span>PESO:</span><strong data-preview="peso"></strong></p>
+            <p><span>EDAD:</span><strong data-preview="edad"></strong><span>PULSO:</span><strong data-preview="pulso"></strong></p>
+            <p><span>TEMP.:</span><strong data-preview="temperatura"></strong><span>T/A:</span><strong data-preview="ta"></strong></p>
+          </div>
+          <section><h3>Diagnóstico</h3><div data-preview="diagnostico"></div></section>
+          <section><h3>Medicamentos</h3><div data-preview="medicamentos"></div></section>
+          <section><h3>Indicaciones</h3><div data-preview="indicaciones"></div></section>
+          <footer id="doctorFooterPreview">CALLE APATZINGÁN No. 2656 COL. FELIPE DE JESÚS, MÉXICO, D.F.</footer>
+        </article>
+        <article id="backPreview" class="recipe-page back-page">
+          <h2>Reverso de receta</h2>
+          <div data-preview="otrasIndicaciones"></div>
+        </article>
+      </section>
+
+      <section id="catalogView" class="view">
+        <section class="card">
+          <h2>Medicamentos</h2>
+          <form id="medicineForm" class="stack">
+            <input name="id" type="hidden" />
+            <label>Nombre <input name="nombre" type="text" /></label>
+            <label>Presentación <input name="presentacion" type="text" /></label>
+            <label>Indicaciones de uso <input name="uso" type="text" /></label>
+            <button class="primary" type="submit">Guardar medicamento</button>
+          </form>
+          <div id="medicineList" class="list"></div>
+        </section>
+
+        <section class="card">
+          <h2>Indicaciones</h2>
+          <form id="indicationForm" class="stack">
+            <input name="id" type="hidden" />
+            <label>Título <input name="titulo" type="text" /></label>
+            <label>Categoría <input name="categoria" type="text" /></label>
+            <label>Texto <textarea name="texto" rows="3"></textarea></label>
+            <button class="primary" type="submit">Guardar indicación</button>
+          </form>
+          <div id="indicationList" class="list"></div>
+        </section>
+      </section>
+
+      <section id="doctorView" class="view">
+        <section class="card">
+          <h2>Datos del doctor</h2>
+          <form id="doctorForm" class="stack">
+            <label>Consultorio <input name="title" type="text" /></label>
+            <label>Nombre del doctor <input name="name" type="text" /></label>
+            <label>Cédula <input name="cedula" type="text" /></label>
+            <label>Escuela <input name="school" type="text" /></label>
+            <label>S.S.A. <input name="ssa" type="text" /></label>
+            <label>Especialidades <input name="specialties" type="text" /></label>
+            <label>Dirección <input name="address" type="text" /></label>
+            <label>Teléfono <input name="phone" type="text" /></label>
+            <button class="primary" type="submit">Guardar doctor</button>
+          </form>
+        </section>
+      </section>
+
+      <section id="dataView" class="view">
+        <section class="card">
+          <h2>Respaldo local</h2>
+          <div class="control-row">
+            <button id="exportBtn" type="button">Exportar respaldo</button>
+            <label class="file-btn">Importar respaldo <input id="importFile" type="file" accept="application/json" /></label>
+          </div>
+          <button id="clearAllBtn" class="danger" type="button">Borrar datos del celular</button>
+        </section>
+      </section>
+    </main>
+
+    <nav class="bottom-nav no-print">
+      <button data-view="recipeView" class="active">Receta</button>
+      <button data-view="previewView">Vista</button>
+      <button data-view="catalogView">Catálogos</button>
+      <button data-view="doctorView">Doctor</button>
+      <button data-view="dataView">Datos</button>
+    </nav>
+
+    <div class="floating-actions no-print">
+      <button id="newRecipeBtn" type="button">Nueva</button>
+      <button id="saveRecipeBtn" class="primary" type="button">Guardar</button>
+    </div>
+
+    <script src="app.js?v=1"></script>
+  </body>
+</html>
