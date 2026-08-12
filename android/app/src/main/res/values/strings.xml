@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Receta Medica</string>
-    <string name="title_activity_main">Receta Medica</string>
+    <string name="app_name">Recetas</string>
+    <string name="title_activity_main">Recetas</string>
     <string name="package_name">com.oscarramosm.recetamedicamobile</string>
     <string name="custom_url_scheme">com.oscarramosm.recetamedicamobile</string>
 </resources>
